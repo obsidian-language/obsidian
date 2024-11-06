@@ -1,0 +1,19 @@
+Need to impl.
+--------
+Add Alloc
+Add Dealloc
+Add Import/Export
+Add Unsafe
+Add Array Slicing
+Add Hex support
+--------
+
+Know how to fix
+--------
+ignore (build_call free_func [| result |] "" builder); // this is for the concat fix
+--------
+
+Need to fix
+--------
+Fix logical
+--------
