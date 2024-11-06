@@ -9,7 +9,7 @@
   <a href="#join-us">Join us</a>
 </p>
 
-<a href="docs/images/snippets.md#fib">
+<a href="docs/snippets.md#fib">
 <img src="docs/images/obsidian_snippet.png" align="right" width="375" alt="fib code in Obsidian. Follow the link to read more.">
 </a>
 
@@ -101,10 +101,10 @@ Obsidian is in early development, with nightly releases of the toolchain availab
 
 ```shell
 # Get the release
-wget https://github.com/obsidian-language/obsidian-lang/releases/download/v${VERSION}/obsidian-${VERSION}.tar.gz
+wget https://github.com/obsidian-language/obsidian-lang/releases/download/v${VERSION}/obsidian-${OS}-${ARCH}.tar.gz
 
 # Unpack the toolchain:
-tar -xvf obsidian-${VERSION}.tar.gz
+tar -xvf obsidian-${OS}-${ARCH}.tar.gz
 
 # Create a simple Obsidian source file:
 echo "fn main() int { println(42); return 0; }" > forty_two.ob
@@ -150,7 +150,7 @@ contribute.
     [Discord](https://discord.gg/#).
 -   To watch for major release announcements, subscribe to our
     [Obsidian release post on GitHub](#)
-    and [star Obsidian-lang](https://github.com/obsidian-language/obsidian-lang).
+    and [star Obsidian-lang](https://github.com/obsidian-language/obsidian).
 -   See our [code of conduct](CODE_OF_CONDUCT.md) and
     [contributing guidelines](CONTRIBUTING.md) for information about the Obsidian
     development community.
@@ -165,12 +165,7 @@ You can also directly:
     -   [Obsidian Toolchain](/lib/), and project infrastructure
 
 You can **check out some
-["good first issues"](https://github.com/obsidian-language/obsidian-lang/labels/good%20first%20issue)**,
-or join the `#contributing-help` channel on
+["good first issues"](https://github.com/obsidian-language/obsidian/labels/good%20first%20issue)**,
+or join the `#contributing-help` channel on`
 [Discord](https://discord.gg/#). See our full
 [`CONTRIBUTING`](CONTRIBUTING.md) documentation for more details.
-
-<!-- Badges -->
-[actions-windows-master]: https://github.com/PeterGriffinSr/Obsidian/workflows/Windows%20(master)/badge.svg
-[actions-macos-master]: https://github.com/PeterGriffinSr/Obsidian/workflows/macOS/badge.svg?branch=master
-[actions-linux-master]: https://github.com/PeterGriffinSr/Obsidian/workflows/Linux%20(master)/badge.svg

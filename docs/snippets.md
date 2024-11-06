@@ -1,6 +1,6 @@
 # Front page snippets for Obsidian
 
-## Fibonacci
+## Obsidian
 A sample of fibonacci sequence in Obsidian.
 ```obsidian
 fn fib(int n) int {
