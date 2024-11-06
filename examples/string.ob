@@ -1,0 +1,12 @@
+fn strcmp(string StringOne, string StringTwo) bool {
+    return StringOne == StringTwo;
+}
+
+fn main() int {
+    if (strcmp(command, "Hello")) {
+        println("this works");
+    } else {
+        println("damn");
+    }
+    return 0;
+}
