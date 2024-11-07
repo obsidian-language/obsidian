@@ -120,24 +120,55 @@ Note: This is a very early-stage release, and many features are still in develop
 
 For those interested in building from source or contributing, follow the setup instructions:
 ```shell
-# Update apt.
-sudo apt update
+bash -c "sh <(curl -fsSL https://opam.ocaml.org/install.sh)"
 
-# Install tools.
-sudo apt install \
-  clang \
-  libc++-dev \
-  libc++abi-dev \
-  lld
+opam init
 
-# Clone the Obsidian repository.
-git clone https://github.com/obsidian-language/obsidian-lang
-cd obsidian-lang
+eval $(opam env)
+
+opam switch create 4.14.2
+
+eval $(opam env)
+
+opam install ocaml-lsp-server odoc ocamlformat utop ppx_deriving llvm.14.0.6 dune menhir
+
+<package manager> llvm14
+
+git clone https://github.com/obsidian-language/obsidian.git
+
+cd obsidian
+
+dune build
 ```
+
+For windows:
+```
+winget install Git.Git OCaml.opam
+
+opam init
+
+POWERSHELL:
+(& opam env) -split '\r?\n' | ForEach-Object { Invoke-Expression $_ }
+
+CMD:
+for /f "tokens=*" %i in ('opam env') do @%i
+
+opam switch create 4.14.2
+
+POWERSHELL:
+(& opam env) -split '\r?\n' | ForEach-Object { Invoke-Expression $_ }
+
+CMD:
+for /f "tokens=*" %i in ('opam env') do @%i
+
+opam install ocaml-lsp-server odoc ocamlformat utop ppx_deriving llvm.14.0.6 dune menhir
+```
+
+For LLVM on windows your on your own for right now.
 
 For those who just want the executable:
 ```shell
-curl -fsSL https://raw.githubusercontent.com/PeterGriffinSr/ember/refs/heads/main/ember | bash
+curl -fsSL https://raw.githubusercontent.com/obsidian-language/ember/refs/heads/main/ember | bash
 ```
 
 ## Join us
