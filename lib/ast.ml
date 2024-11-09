@@ -65,8 +65,16 @@ type token =
   | Rightshift
   | Xor
   | Identifier of string
-  | Int of int
-  | Float of float
+  | I8 of int
+  | I16 of int
+  | I32 of int
+  | I64 of int
+  | U8 of int
+  | U16 of int
+  | U32 of int
+  | U64 of int
+  | F32 of float
+  | F64 of float
   | String of string
   | Char of char
   | Bool of bool
@@ -140,8 +148,16 @@ let pp_token fmt = function
   | Rightshift -> Format.fprintf fmt "Rightshift"
   | Xor -> Format.fprintf fmt "Xor"
   | Identifier s -> Format.fprintf fmt "Identifier(%s)" s
-  | Int i -> Format.fprintf fmt "Int(%d)" i
-  | Float f -> Format.fprintf fmt "Float(%f)" f
+  | I8 i -> Format.fprintf fmt "Int8(%d)" i
+  | I16 i -> Format.fprintf fmt "Int16(%d)" i
+  | I32 i -> Format.fprintf fmt "Int32(%d)" i
+  | I64 i -> Format.fprintf fmt "Int64(%d)" i
+  | U8 i -> Format.fprintf fmt "Uint8(%d)" i
+  | U16 i -> Format.fprintf fmt "Uint16(%d)" i
+  | U32 i -> Format.fprintf fmt "Uint32(%d)" i
+  | U64 i -> Format.fprintf fmt "Uint64(%d)" i
+  | F32 f -> Format.fprintf fmt "Float32(%f)" f
+  | F64 f -> Format.fprintf fmt "Float64(%f)" f
   | String s -> Format.fprintf fmt "String(%s)" s
   | Char c -> Format.fprintf fmt "Char(%c)" c
   | Bool b -> Format.fprintf fmt "Bool(%b)" b
@@ -158,8 +174,16 @@ end
 
 module Expr = struct
   type t =
-    | IntExpr of { value : int }
-    | FloatExpr of { value : float }
+    | Int8Expr of { value : int }
+    | Int16Expr of { value : int }
+    | Int32Expr of { value : int }
+    | Int64Expr of { value : int }
+    | Float32Expr of { value : float }
+    | Float64Expr of { value : float }
+    | Unsigned8Expr of { value : int }
+    | Unsigned16Expr of { value : int }
+    | Unsigned32Expr of { value : int }
+    | Unsigned64Expr of { value : int }
     | StringExpr of { value : string }
     | CharExpr of { value : char }
     | BoolExpr of { value : bool }

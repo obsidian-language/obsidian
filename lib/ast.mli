@@ -65,8 +65,16 @@ type token =
   | Rightshift
   | Xor
   | Identifier of string
-  | Int of int
-  | Float of float
+  | I8 of int
+  | I16 of int
+  | I32 of int
+  | I64 of int
+  | U8 of int
+  | U16 of int
+  | U32 of int
+  | U64 of int
+  | F32 of float
+  | F64 of float
   | String of string
   | Char of char
   | Bool of bool
@@ -87,8 +95,16 @@ end
 
 module Expr : sig
   type t =
-    | IntExpr of { value : int }
-    | FloatExpr of { value : float }
+    | Int8Expr of { value : int }
+    | Int16Expr of { value : int }
+    | Int32Expr of { value : int }
+    | Int64Expr of { value : int }
+    | Float32Expr of { value : float }
+    | Float64Expr of { value : float }
+    | Unsigned8Expr of { value : int }
+    | Unsigned16Expr of { value : int }
+    | Unsigned32Expr of { value : int }
+    | Unsigned64Expr of { value : int }
     | StringExpr of { value : string }
     | CharExpr of { value : char }
     | BoolExpr of { value : bool }
@@ -104,11 +120,21 @@ module Expr : sig
     | TypeofExpr of { expr : t }
     | LengthExpr of { expr : t }
     | PrintlnExpr of { expr : t }
-    | PrintlnFormatExpr of { format_string : string; arguments : t list }
+    | PrintlnFormatExpr of {
+        format_string : string;
+        arguments : t list;
+      }
     | InputExpr of { prompt : string; target_type : Type.t }
     | NewExpr of { class_name : string }
-    | MethodCall of { obj : t; method_name : string; arguments : t list }
-    | AssignmentExpr of { identifier : string; value : t option }
+    | MethodCall of {
+        obj : t;
+        method_name : string;
+        arguments : t list;
+      }
+    | AssignmentExpr of {
+        identifier : string;
+        value : t option;
+      }
     | ArrayExpr of { elements : t list }
     | IndexExpr of { array : t; index : t }
     | StructFieldAssign of {
@@ -116,7 +142,10 @@ module Expr : sig
         field_name : string;
         value : t;
       }
-    | FieldAccess of { object_name : string; member_name : string }
+    | FieldAccess of {
+        object_name : string;
+        member_name : string;
+      }
 
   val pp : Format.formatter -> t -> unit
   val show : t -> string
@@ -143,7 +172,11 @@ module Stmt : sig
         body : t list;
       }
     | WhileStmt of { expr : Expr.t; body : t list }
-    | IfStmt of { condition : Expr.t; then_branch : t; else_branch : t option }
+    | IfStmt of {
+        condition : Expr.t;
+        then_branch : t;
+        else_branch : t option;
+      }
     | SwitchStmt of {
         expr : Expr.t;
         cases : (Expr.t * t list) list;

@@ -4,12 +4,20 @@ open Ast
 let context = global_context ()
 let the_module = create_module context "obsidian"
 let builder = builder context
+let i8_type = i8_type context
+let i16_type = i16_type context
+let i32_type = i32_type context
 let i64_type = i64_type context
+let f32_type = float_type context
 let f64_type = double_type context
+let u8_type = i8_type
+let u16_type = i16_type
+let u32_type = i32_type
+let u64_type = i64_type
 let i1_type = i1_type context
-let char_type = i8_type context
+let char_type = i8_type
 let void_type = void_type context
-let string_type = pointer_type (i8_type context)
+let string_type = pointer_type i8_type
 let variables = Hashtbl.create 10
 let struct_type = Hashtbl.create 10
 let enum_values = Hashtbl.create 10
@@ -40,8 +48,16 @@ let define_struct_type name (fields : (string * Type.t) list) =
       (List.map
          (fun (_, t) ->
            match t with
-           | Type.SymbolType { value = "int" } -> i64_type
-           | Type.SymbolType { value = "float" } -> f64_type
+           | Type.SymbolType { value = "i8" } -> i8_type
+           | Type.SymbolType { value = "i16" } -> i16_type
+           | Type.SymbolType { value = "i32" } -> i32_type
+           | Type.SymbolType { value = "i64" } -> i64_type
+           | Type.SymbolType { value = "f32" } -> f32_type
+           | Type.SymbolType { value = "f64" } -> f64_type
+           | Type.SymbolType { value = "u8" } -> u8_type
+           | Type.SymbolType { value = "u16" } -> u16_type
+           | Type.SymbolType { value = "u32" } -> u32_type
+           | Type.SymbolType { value = "u64" } -> u64_type
            | Type.SymbolType { value = "string" } -> string_type
            | Type.SymbolType { value = "bool" } -> i1_type
            | _ -> failwith ("Unsupported field type in struct: " ^ name))
@@ -101,9 +117,28 @@ let declare_malloc_function _context the_module =
   let malloc_type = function_type i8_ptr_type [| i64_type |] in
   declare_function "malloc" malloc_type the_module
 
+let is_unsigned_type llvm_type =
+  (* Assuming you have a way to detect unsigned types, for example: *)
+  match classify_type llvm_type with
+  | TypeKind.Integer ->
+      (* Add logic to detect unsigned *)
+      (* Custom logic based on metadata or naming conventions *)
+      (* This part depends on your environment *)
+      false
+      (* Assuming signed by default *)
+  | _ -> false
+
 let type_size_in_bytes = function
-  | Ast.Type.SymbolType { value = "int" } -> 8
-  | Ast.Type.SymbolType { value = "float" } -> 8
+  | Ast.Type.SymbolType { value = "i8" } -> 1
+  | Ast.Type.SymbolType { value = "i16" } -> 2
+  | Ast.Type.SymbolType { value = "i32" } -> 4
+  | Ast.Type.SymbolType { value = "i64" } -> 8
+  | Ast.Type.SymbolType { value = "f32" } -> 4
+  | Ast.Type.SymbolType { value = "f64" } -> 8
+  | Ast.Type.SymbolType { value = "u8" } -> 1
+  | Ast.Type.SymbolType { value = "u16" } -> 2
+  | Ast.Type.SymbolType { value = "u32" } -> 4
+  | Ast.Type.SymbolType { value = "u64" } -> 8
   | Ast.Type.SymbolType { value = "char" } -> 1
   | Ast.Type.SymbolType { value = "string" } -> 8
   | Ast.Type.SymbolType { value = "bool" } -> 1
@@ -111,34 +146,69 @@ let type_size_in_bytes = function
 
 let string_of_llvm_type llvm_type =
   match classify_type llvm_type with
-  | TypeKind.Integer -> "int"
-  | TypeKind.Double -> "float"
+  | TypeKind.Integer -> (
+      let bit_width = integer_bitwidth llvm_type in
+      if is_unsigned_type llvm_type then
+        match bit_width with
+        | 8 -> "u8"
+        | 16 -> "u16"
+        | 32 -> "u32"
+        | 64 -> "u64"
+        | _ -> "unknown_uint"
+      else
+        match bit_width with
+        | 8 -> "i8"
+        | 16 -> "i16"
+        | 32 -> "i32"
+        | 64 -> "i64"
+        | _ -> "unknown_int")
+  | TypeKind.Float -> "f32"
+  | TypeKind.Double -> "f64"
   | TypeKind.Pointer -> "string"
   | TypeKind.Void -> "void"
-  | TypeKind.Float -> "float"
   | TypeKind.Function -> "function"
   | _ -> "unknown"
 
 let print_any_type value llvm_type =
   match classify_type llvm_type with
   | TypeKind.Integer ->
-      let value_type = integer_bitwidth llvm_type in
-      if value_type = 8 then (
-        let format_str = build_global_stringptr "%c\n\\0" "char_fmt" builder in
+      let bit_width = integer_bitwidth llvm_type in
+      if bit_width = 8 then
+        let format_str =
+          if is_unsigned_type llvm_type then
+            build_global_stringptr "%u\n" "u8_fmt" builder
+          else build_global_stringptr "%c\n" "char_fmt" builder
+        in
         ignore
-          (build_call printf_func [| format_str; value |] "printtmp" builder);
-        value)
-      else
-        let format_str = build_global_stringptr "%ld\n" "int_fmt" builder in
+          (build_call printf_func [| format_str; value |] "printtmp" builder)
+      else if bit_width = 16 || bit_width = 32 then
+        let format_str =
+          if is_unsigned_type llvm_type then
+            build_global_stringptr "%u\n" "uint_fmt" builder
+          else build_global_stringptr "%d\n" "int_fmt" builder
+        in
         ignore
-          (build_call printf_func [| format_str; value |] "printtmp" builder);
-        value
-  | TypeKind.Double ->
+          (build_call printf_func [| format_str; value |] "printtmp" builder)
+      else if bit_width = 64 then
+        let format_str =
+          if is_unsigned_type llvm_type then
+            build_global_stringptr "%lu\n" "uint64_fmt" builder
+          else build_global_stringptr "%ld\n" "int64_fmt" builder
+        in
+        ignore
+          (build_call printf_func [| format_str; value |] "printtmp" builder)
+      else failwith "Codegen: Unsupported integer bit width";
+      value
+  | TypeKind.Float ->
       let format_str = build_global_stringptr "%f\n" "float_fmt" builder in
       ignore (build_call printf_func [| format_str; value |] "printtmp" builder);
       value
+  | TypeKind.Double ->
+      let format_str = build_global_stringptr "%lf\n" "double_fmt" builder in
+      ignore (build_call printf_func [| format_str; value |] "printtmp" builder);
+      value
   | TypeKind.Pointer ->
-      let format_str = build_global_stringptr "%s\n\\0" "str_fmt" builder in
+      let format_str = build_global_stringptr "%s\n" "str_fmt" builder in
       ignore (build_call printf_func [| format_str; value |] "printtmp" builder);
       value
   | TypeKind.Void -> failwith "Codegen: Cannot print void type"
@@ -150,8 +220,16 @@ let is_char_type llvm_type =
   | _ -> false
 
 let rec codegen_expr = function
-  | Expr.IntExpr { value } -> const_int i64_type value
-  | Expr.FloatExpr { value } -> const_float f64_type value
+  | Expr.Int8Expr { value } -> const_int i8_type value
+  | Expr.Int16Expr { value } -> const_int i16_type value
+  | Expr.Int32Expr { value } -> const_int i32_type value
+  | Expr.Int64Expr { value } -> const_int i64_type value
+  | Expr.Float32Expr { value } -> const_float f32_type value
+  | Expr.Float64Expr { value } -> const_float f64_type value
+  | Expr.Unsigned8Expr { value } -> const_int u8_type value
+  | Expr.Unsigned16Expr { value } -> const_int u16_type value
+  | Expr.Unsigned32Expr { value } -> const_int u32_type value
+  | Expr.Unsigned64Expr { value } -> const_int u64_type value
   | Expr.CharExpr { value } -> const_int char_type (Char.code value)
   | Expr.StringExpr { value } -> build_global_stringptr value "strtmp" builder
   | Expr.BoolExpr { value } -> const_int i1_type (if value then 1 else 0)
@@ -581,16 +659,32 @@ let rec codegen_stmt = function
       { identifier; constant = _; assigned_value; explicit_type } ->
       let llvm_type =
         match explicit_type with
-        | Ast.Type.SymbolType { value = "int" } -> i64_type
-        | Ast.Type.SymbolType { value = "float" } -> f64_type
+        | Ast.Type.SymbolType { value = "i8" } -> i8_type
+        | Ast.Type.SymbolType { value = "i16" } -> i16_type
+        | Ast.Type.SymbolType { value = "i32" } -> i32_type
+        | Ast.Type.SymbolType { value = "i64" } -> i64_type
+        | Ast.Type.SymbolType { value = "f32" } -> f32_type
+        | Ast.Type.SymbolType { value = "f64" } -> f64_type
+        | Ast.Type.SymbolType { value = "u8" } -> u8_type
+        | Ast.Type.SymbolType { value = "u16" } -> u16_type
+        | Ast.Type.SymbolType { value = "u32" } -> u32_type
+        | Ast.Type.SymbolType { value = "u64" } -> u64_type
         | Ast.Type.SymbolType { value = "char" } -> char_type
         | Ast.Type.SymbolType { value = "string" } -> string_type
         | Ast.Type.SymbolType { value = "bool" } -> i1_type
         | Ast.Type.ArrayType { element } ->
             let elem_type =
               match element with
-              | Ast.Type.SymbolType { value = "int" } -> i64_type
-              | Ast.Type.SymbolType { value = "float" } -> f64_type
+              | Ast.Type.SymbolType { value = "i8" } -> i8_type
+              | Ast.Type.SymbolType { value = "i16" } -> i16_type
+              | Ast.Type.SymbolType { value = "i32" } -> i32_type
+              | Ast.Type.SymbolType { value = "i64" } -> i64_type
+              | Ast.Type.SymbolType { value = "f32" } -> f32_type
+              | Ast.Type.SymbolType { value = "f64" } -> f64_type
+              | Ast.Type.SymbolType { value = "u8" } -> u8_type
+              | Ast.Type.SymbolType { value = "u16" } -> u16_type
+              | Ast.Type.SymbolType { value = "u32" } -> u32_type
+              | Ast.Type.SymbolType { value = "u64" } -> u64_type
               | Ast.Type.SymbolType { value = "char" } -> char_type
               | Ast.Type.SymbolType { value = "string" } -> string_type
               | _ -> failwith "Codegen: Unsupported array element type"
@@ -654,6 +748,16 @@ let rec codegen_stmt = function
   | Stmt.FuncDeclStmt { name; parameters; return_type; body } ->
       let llvm_return_type =
         match return_type with
+        | Some (Ast.Type.SymbolType { value = "i8" }) -> i8_type
+        | Some (Ast.Type.SymbolType { value = "i16" }) -> i16_type
+        | Some (Ast.Type.SymbolType { value = "i32" }) -> i32_type
+        | Some (Ast.Type.SymbolType { value = "i64" }) -> i64_type
+        | Some (Ast.Type.SymbolType { value = "f32" }) -> f32_type
+        | Some (Ast.Type.SymbolType { value = "f64" }) -> f64_type
+        | Some (Ast.Type.SymbolType { value = "u8" }) -> u8_type
+        | Some (Ast.Type.SymbolType { value = "u16" }) -> u16_type
+        | Some (Ast.Type.SymbolType { value = "u32" }) -> u32_type
+        | Some (Ast.Type.SymbolType { value = "u64" }) -> u64_type
         | Some (Ast.Type.SymbolType { value = "int" }) -> i64_type
         | Some (Ast.Type.SymbolType { value = "float" }) -> f64_type
         | Some (Ast.Type.SymbolType { value = "char" }) -> char_type
@@ -667,8 +771,16 @@ let rec codegen_stmt = function
           (List.map
              (fun param ->
                match param.Stmt.param_type with
-               | Ast.Type.SymbolType { value = "int" } -> i64_type
-               | Ast.Type.SymbolType { value = "float" } -> f64_type
+               | Ast.Type.SymbolType { value = "i8" } -> i8_type
+               | Ast.Type.SymbolType { value = "i16" } -> i16_type
+               | Ast.Type.SymbolType { value = "i32" } -> i32_type
+               | Ast.Type.SymbolType { value = "i64" } -> i64_type
+               | Ast.Type.SymbolType { value = "f32" } -> f32_type
+               | Ast.Type.SymbolType { value = "f64" } -> f64_type
+               | Ast.Type.SymbolType { value = "u8" } -> u8_type
+               | Ast.Type.SymbolType { value = "u16" } -> u16_type
+               | Ast.Type.SymbolType { value = "u32" } -> u32_type
+               | Ast.Type.SymbolType { value = "u64" } -> u64_type
                | Ast.Type.SymbolType { value = "char" } -> char_type
                | Ast.Type.SymbolType { value = "string" } -> string_type
                | Ast.Type.SymbolType { value = "bool" } -> i1_type

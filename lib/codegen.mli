@@ -1,14 +1,23 @@
 val context : Llvm.llcontext
 val the_module : Llvm.llmodule
 val builder : Llvm.llbuilder
+val i8_type : Llvm.lltype
+val i16_type : Llvm.lltype
+val i32_type : Llvm.lltype
 val i64_type : Llvm.lltype
+val f32_type : Llvm.lltype
 val f64_type : Llvm.lltype
+val u8_type : Llvm.lltype
+val u16_type : Llvm.lltype
+val u32_type : Llvm.lltype
+val u64_type : Llvm.lltype
 val i1_type : Llvm.lltype
 val char_type : Llvm.lltype
 val void_type : Llvm.lltype
 val string_type : Llvm.lltype
 val variables : (string, Llvm.llvalue) Hashtbl.t
 val struct_type : (string, Llvm.lltype * (string * Ast.Type.t) list) Hashtbl.t
+val enum_values : (string, Llvm.llvalue) Hashtbl.t
 val printf_type : Llvm.lltype
 val printf_func : Llvm.llvalue
 val malloc_type : Llvm.lltype
@@ -19,12 +28,14 @@ val find_field_index : (string * 'a) list -> string -> int
 val get_struct_type : string -> Llvm.lltype * (string * Ast.Type.t) list
 val define_struct_type : string -> (string * Ast.Type.t) list -> Llvm.lltype
 val get_struct_instance : string -> Llvm.llvalue
+val get_struct_instance_opt : string -> Llvm.llvalue option
 val free_func : Llvm.llvalue
 val strcpy_func : Llvm.llvalue
 val strcat_func : Llvm.llvalue
 val strlen_func : Llvm.llvalue
 val concatenate_strings : Llvm.llvalue -> Llvm.llvalue -> Llvm.llvalue
 val declare_malloc_function : 'a -> Llvm.llmodule -> Llvm.llvalue
+val is_unsigned_type : Llvm.lltype -> bool
 val type_size_in_bytes : Ast.Type.t -> int
 val string_of_llvm_type : Llvm.lltype -> string
 val print_any_type : Llvm.llvalue -> Llvm.lltype -> Llvm.llvalue

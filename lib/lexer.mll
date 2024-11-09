@@ -21,7 +21,7 @@
     t
 }
 
-let Identifier = ['a'-'z' 'A'-'Z']*
+let Identifier = ['a'-'z' 'A'-'Z']+
 let Digits = ['0'-'9']+
 let Floats = Digits '.' Digits+
 
@@ -30,8 +30,16 @@ rule token = parse
     | '\n'              { update_line (); token lexbuf }
     | "//"              { read_comment lexbuf }
 
-    | "int"                 { ignore (update_column_with_lexeme lexbuf); Int }
-    | "float"               { ignore (update_column_with_lexeme lexbuf); Float }
+    | "i8"                  { ignore (update_column_with_lexeme lexbuf); I8 }
+    | "i16"                 { ignore (update_column_with_lexeme lexbuf); I16 }
+    | "i32"                 { ignore (update_column_with_lexeme lexbuf); I32 }
+    | "i64"                 { ignore (update_column_with_lexeme lexbuf); I64 }
+    | "f32"                 { ignore (update_column_with_lexeme lexbuf); F32 }
+    | "f64"                 { ignore (update_column_with_lexeme lexbuf); F64 }
+    | "u8"                  { ignore (update_column_with_lexeme lexbuf); U8 }
+    | "u16"                 { ignore (update_column_with_lexeme lexbuf); U16 }
+    | "u32"                 { ignore (update_column_with_lexeme lexbuf); U32 }
+    | "u64"                 { ignore (update_column_with_lexeme lexbuf); U64 }
     | "string"              { ignore (update_column_with_lexeme lexbuf); String }
     | "char"                { ignore (update_column_with_lexeme lexbuf); Char }
     | "bool"                { ignore (update_column_with_lexeme lexbuf); Bool }
@@ -88,7 +96,7 @@ rule token = parse
     | "%"                   { token_and_update_column Percent lexbuf }
     | "="                   { token_and_update_column Assign lexbuf }
     | "&"                   { token_and_update_column Ampersand lexbuf }
-    | "|"                   {token_and_update_column Pipe lexbuf }
+    | "|"                   { token_and_update_column Pipe lexbuf }
     | "?"                   { token_and_update_column Question lexbuf }
 
     | "**"                  { column := !column + 2; Power }
@@ -108,13 +116,60 @@ rule token = parse
     | "<<"                  { column := !column + 2; Leftshift }
     | ">>"                  { column := !column + 2; Rightshift }
 
-    | Identifier            { let lexeme = Lexing.lexeme lexbuf in column := !column + String.length lexeme; Identifier lexeme }
-    | Floats                { let lexeme = Lexing.lexeme lexbuf in column := !column + String.length lexeme; FloatLit (float_of_string lexeme) }
-    | Digits                { let lexeme = Lexing.lexeme lexbuf in column := !column + String.length lexeme; IntLit (int_of_string lexeme) }
-    | '\'' [^'\''] '\''     { let lexeme = Lexing.lexeme lexbuf in column := !column + String.length lexeme; CharLit (lexeme.[1]) }
-    | '"' [^'"']* '"'       { let lexeme = Lexing.lexeme lexbuf in column := !column + String.length lexeme; StringLit (String.sub lexeme 1 (String.length lexeme - 2)) }
+    (* Floating-point literals with explicit f32/f64 suffix *)
+    | Floats "f32" as lexeme { 
+        column := !column + String.length lexeme; 
+        Float32Lit (float_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
+    }
+    | Floats "f64" as lexeme { 
+        column := !column + String.length lexeme; 
+        Float64Lit (float_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
+    }
+
+    (* Integer literals with explicit i8/i16/etc. suffix *)
+    | Digits "i8" as lexeme { 
+        column := !column + String.length lexeme; 
+        Int8Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 2)))
+    }
+    | Digits "i16" as lexeme { 
+        column := !column + String.length lexeme; 
+        Int16Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
+    }
+    | Digits "i32" as lexeme { 
+        column := !column + String.length lexeme; 
+        Int32Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
+    }
+    | Digits "i64" as lexeme { 
+        column := !column + String.length lexeme; 
+        Int64Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
+    }
+    | Digits as lexeme {
+        column := !column + String.length lexeme;
+        IntLit (int_of_string lexeme)
+    }
+
+    | Identifier as lexeme  { 
+        column := !column + String.length lexeme; 
+        Identifier lexeme 
+    }
+    | '\'' [^'\''] '\''     { 
+        let lexeme = Lexing.lexeme lexbuf in 
+        column := !column + String.length lexeme; 
+        CharLit (lexeme.[1]) 
+    }
+    | '"' [^'"']* '"'       { 
+        let lexeme = Lexing.lexeme lexbuf in 
+        column := !column + String.length lexeme; 
+        StringLit (String.sub lexeme 1 (String.length lexeme - 2)) 
+    }
     | eof                   { EOF }
-    | _                     { let saved_line = get_line () in let saved_column = get_column () in let lexeme = Lexing.lexeme lexbuf in Printf.eprintf "Unexpected token '%s' at Line %d, Column %d\n" lexeme saved_line saved_column; exit (-1) }
+    | _                     { 
+        let saved_line = get_line () in 
+        let saved_column = get_column () in 
+        let lexeme = Lexing.lexeme lexbuf in 
+        Printf.eprintf "Unexpected token '%s' at Line %d, Column %d\n" lexeme saved_line saved_column; 
+        exit (-1) 
+    }
 
 and read_comment = parse
     | '\n'                 { incr line; column := 0; token lexbuf }

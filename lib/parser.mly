@@ -2,11 +2,11 @@
 %left Star Slash Percent
 %left Power
 
-%token Int Float String Bool Char Void Const Fn If Else Switch Case Default Break While For Return Enum New Null Alloc Dealloc Sizeof Unsafe Private Typeof Import Export LParen RParen LBrace RBrace LBracket RBracket Comma Dot Semi Colon Plus Minus Star Slash Percent Not Assign Less Greater Ampersand Carot Neq Eq Leq Geq LogicalAnd LogicalOr Inc Dec Power Cast Println Length Input PlusAssign MinusAssign StarAssign SlashAssign Pipe Leftshift Rightshift Xor Question Struct
+%token I8 I16 I32 I64 F32 F64 U8 U16 U32 U64 String Bool Char Void Const Fn If Else Switch Case Default Break While For Return Enum New Null Alloc Dealloc Sizeof Unsafe Private Typeof Import Export LParen RParen LBrace RBrace LBracket RBracket Comma Dot Semi Colon Plus Minus Star Slash Percent Not Assign Less Greater Ampersand Carot Neq Eq Leq Geq LogicalAnd LogicalOr Inc Dec Power Cast Println Length Input PlusAssign MinusAssign StarAssign SlashAssign Pipe Leftshift Rightshift Xor Question Struct
 
 %token <string> Identifier
-%token <int> IntLit
-%token <float> FloatLit
+%token <int> IntLit Int8Lit Int16Lit Int32Lit Int64Lit
+%token <float> FloatLit Float32Lit Float64Lit
 %token <string> StringLit
 %token <char> CharLit
 %token <bool> BoolLit
@@ -46,8 +46,16 @@ compound_stmt:
     | StructStmt { $1 }
 
 type_expr:
-    | Int { Ast.Type.SymbolType { value = "int" } }
-    | Float { Ast.Type.SymbolType { value = "float" } }
+    | I8 { Ast.Type.SymbolType { value = "i8" } }
+    | I16 { Ast.Type.SymbolType { value = "i16" } }
+    | I32 { Ast.Type.SymbolType { value = "i32" } }
+    | I64 { Ast.Type.SymbolType { value = "i64" } }
+    | F32 { Ast.Type.SymbolType { value = "f32" } }
+    | F64 { Ast.Type.SymbolType { value = "f64" } }
+    | U8 { Ast.Type.SymbolType { value = "u8" } }
+    | U16 { Ast.Type.SymbolType { value = "u16" } }
+    | U32 { Ast.Type.SymbolType { value = "u32" } }
+    | U64 { Ast.Type.SymbolType { value = "u64" } }
     | String { Ast.Type.SymbolType { value = "string" } }
     | Char { Ast.Type.SymbolType { value = "char" } }
     | Bool { Ast.Type.SymbolType { value = "bool" } }
@@ -84,11 +92,19 @@ expr:
     | Not expr { Ast.Expr.UnaryExpr { operator = Ast.Not; operand = $2 } }
     | expr Inc { Ast.Expr.UnaryExpr { operator = Ast.Inc; operand = $1 } }
     | expr Dec { Ast.Expr.UnaryExpr { operator = Ast.Dec; operand = $1 } }
-    | Minus IntLit { Ast.Expr.IntExpr { value = -$2 } }
-    | Minus FloatLit { Ast.Expr.FloatExpr { value = -. $2 } }
+    | Minus Int8Lit { Ast.Expr.Int8Expr { value = -$2 } }
+    | Minus Int16Lit { Ast.Expr.Int16Expr { value = -$2 } }
+    | Minus Int32Lit { Ast.Expr.Int32Expr { value = -$2 } }
+    | Minus Int64Lit { Ast.Expr.Int64Expr { value = -$2 } }
+    | Minus Float32Lit { Ast.Expr.Float32Expr { value = -. $2 } }
+    | Minus Float64Lit { Ast.Expr.Float64Expr { value = -. $2 } }
     | Minus Identifier { Ast.Expr.UnaryExpr { operator = Ast.Minus; operand = Ast.Expr.VarExpr $2 } }
-    | IntLit { Ast.Expr.IntExpr { value = $1 } }
-    | FloatLit { Ast.Expr.FloatExpr { value = $1 } }
+    | Int8Lit { Ast.Expr.Int8Expr { value = $1 } }
+    | Int16Lit { Ast.Expr.Int16Expr { value = $1 } }
+    | Int32Lit { Ast.Expr.Int32Expr { value = $1 } }
+    | Int64Lit { Ast.Expr.Int64Expr { value = $1 } }
+    | Float32Lit { Ast.Expr.Float32Expr { value = $1 } }
+    | Float64Lit { Ast.Expr.Float64Expr { value = $1 } }
     | StringLit { Ast.Expr.StringExpr { value = $1 } }
     | CharLit { Ast.Expr.CharExpr { value = $1 } }
     | BoolLit { Ast.Expr.BoolExpr { value = $1 } }

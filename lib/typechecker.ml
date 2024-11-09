@@ -61,7 +61,9 @@ module TypeChecker = struct
   let rec is_valid_type env = function
     | Type.SymbolType { value } -> (
         match value with
-        | "int" | "float" | "string" | "char" | "bool" | "void" -> true
+        | "i8" | "i16" | "i32" | "i64" | "f32" | "f64" | "string" | "char"
+        | "bool" | "void" ->
+            true
         | _ -> Env.mem value env.struct_types || Env.mem value env.enum_type)
     | Type.ArrayType { element } -> is_valid_type env element
     | _ -> false
@@ -81,8 +83,16 @@ module TypeChecker = struct
     List.iter (fun arg -> ignore (check_expr env arg)) arguments
 
   and check_expr env = function
-    | Expr.IntExpr _ -> Type.SymbolType { value = "int" }
-    | Expr.FloatExpr _ -> Type.SymbolType { value = "float" }
+    | Expr.Int8Expr _ -> Type.SymbolType { value = "i8" }
+    | Expr.Int16Expr _ -> Type.SymbolType { value = "i16" }
+    | Expr.Int32Expr _ -> Type.SymbolType { value = "i32" }
+    | Expr.Int64Expr _ -> Type.SymbolType { value = "i64" }
+    | Expr.Float32Expr _ -> Type.SymbolType { value = "f32" }
+    | Expr.Float64Expr _ -> Type.SymbolType { value = "f64" }
+    | Expr.Unsigned8Expr _ -> Type.SymbolType { value = "u8" }
+    | Expr.Unsigned16Expr _ -> Type.SymbolType { value = "u16" }
+    | Expr.Unsigned32Expr _ -> Type.SymbolType { value = "u32" }
+    | Expr.Unsigned64Expr _ -> Type.SymbolType { value = "u64" }
     | Expr.StringExpr _ -> Type.SymbolType { value = "string" }
     | Expr.CharExpr _ -> Type.SymbolType { value = "char" }
     | Expr.BoolExpr _ -> Type.SymbolType { value = "bool" }
@@ -90,23 +100,11 @@ module TypeChecker = struct
         let left_type = check_expr env left in
         let right_type = check_expr env right in
         match operator with
-        | Plus | Minus | Star | Slash | Percent | Power | PlusAssign
-        | MinusAssign | StarAssign | SlashAssign | Ampersand | Pipe | Rightshift
-        | Leftshift | Xor ->
+        | Plus | Minus | Star | Slash | Percent | Power ->
             if left_type = right_type then left_type
             else raise_type_mismatch_error left_type right_type
         | Eq | Neq | Less | Greater | Leq | Geq ->
-            if left_type = right_type then
-              match left_type with
-              | Type.SymbolType { value = "int" }
-              | Type.SymbolType { value = "float" }
-              | Type.SymbolType { value = "char" }
-              | Type.SymbolType { value = "string" } ->
-                  Type.SymbolType { value = "bool" }
-              | _ ->
-                  raise
-                    (UnsupportedOperationError
-                       "Typechecker: Unsupported type for comparison")
+            if left_type = right_type then Type.SymbolType { value = "bool" }
             else raise_type_mismatch_error left_type right_type
         | LogicalAnd | LogicalOr ->
             (* Printf.printf "Evaluating left operand: %s\n" (Type.show left_type);
@@ -192,16 +190,32 @@ module TypeChecker = struct
                    "Typechecker: Operand of NOT operator must be a boolean")
         | Ast.Inc | Ast.Dec ->
             if
-              operand_type = Ast.Type.SymbolType { value = "int" }
-              || operand_type = Ast.Type.SymbolType { value = "float" }
+              operand_type = Ast.Type.SymbolType { value = "i8" }
+              || operand_type = Ast.Type.SymbolType { value = "i16" }
+              || operand_type = Ast.Type.SymbolType { value = "i32" }
+              || operand_type = Ast.Type.SymbolType { value = "i64" }
+              || operand_type = Ast.Type.SymbolType { value = "f32" }
+              || operand_type = Ast.Type.SymbolType { value = "f64" }
+              || operand_type = Ast.Type.SymbolType { value = "u8" }
+              || operand_type = Ast.Type.SymbolType { value = "u16" }
+              || operand_type = Ast.Type.SymbolType { value = "u32" }
+              || operand_type = Ast.Type.SymbolType { value = "u64" }
             then operand_type
             else
               raise
                 (TypeError "Typechecker: INC/DEC requires int or float operand")
         | Ast.Minus ->
             if
-              operand_type = Ast.Type.SymbolType { value = "int" }
-              || operand_type = Ast.Type.SymbolType { value = "float" }
+              operand_type = Ast.Type.SymbolType { value = "i8" }
+              || operand_type = Ast.Type.SymbolType { value = "i16" }
+              || operand_type = Ast.Type.SymbolType { value = "i32" }
+              || operand_type = Ast.Type.SymbolType { value = "i64" }
+              || operand_type = Ast.Type.SymbolType { value = "f32" }
+              || operand_type = Ast.Type.SymbolType { value = "f64" }
+              || operand_type = Ast.Type.SymbolType { value = "u8" }
+              || operand_type = Ast.Type.SymbolType { value = "u16" }
+              || operand_type = Ast.Type.SymbolType { value = "u32" }
+              || operand_type = Ast.Type.SymbolType { value = "u64" }
             then operand_type
             else
               raise
@@ -216,23 +230,47 @@ module TypeChecker = struct
     | Expr.LengthExpr { expr } ->
         let expr_type = check_expr env expr in
         if expr_type = Type.SymbolType { value = "string" } then
-          Type.SymbolType { value = "int" }
+          Type.SymbolType { value = "i32" }
         else
           raise (TypeError "Typechecker: Length can only be applied to strings")
     | Expr.CastExpr { expr; target_type } -> (
         let source_type = check_expr env expr in
         match (source_type, target_type) with
-        | Type.SymbolType { value = "int" }, Type.SymbolType { value = "float" }
-        | Type.SymbolType { value = "float" }, Type.SymbolType { value = "int" }
-        | ( Type.SymbolType { value = "int" },
+        | Type.SymbolType { value = "i8" }, Type.SymbolType { value = "i16" }
+        | Type.SymbolType { value = "i8" }, Type.SymbolType { value = "i32" }
+        | Type.SymbolType { value = "i8" }, Type.SymbolType { value = "i64" }
+        | Type.SymbolType { value = "i8" }, Type.SymbolType { value = "f32" }
+        | Type.SymbolType { value = "i8" }, Type.SymbolType { value = "f64" }
+        | Type.SymbolType { value = "i16" }, Type.SymbolType { value = "i32" }
+        | Type.SymbolType { value = "i16" }, Type.SymbolType { value = "i64" }
+        | Type.SymbolType { value = "i16" }, Type.SymbolType { value = "f32" }
+        | Type.SymbolType { value = "i16" }, Type.SymbolType { value = "f64" }
+        | Type.SymbolType { value = "f32" }, Type.SymbolType { value = "f64" }
+        | Type.SymbolType { value = "i8" }, Type.SymbolType { value = "string" }
+        | ( Type.SymbolType { value = "i16" },
             Type.SymbolType { value = "string" } )
-        | ( Type.SymbolType { value = "float" },
+        | ( Type.SymbolType { value = "i32" },
             Type.SymbolType { value = "string" } )
-        | Type.SymbolType { value = "bool" }, Type.SymbolType { value = "int" }
+        | ( Type.SymbolType { value = "i64" },
+            Type.SymbolType { value = "string" } )
+        | ( Type.SymbolType { value = "f32" },
+            Type.SymbolType { value = "string" } )
+        | ( Type.SymbolType { value = "f64" },
+            Type.SymbolType { value = "string" } )
+        | Type.SymbolType { value = "bool" }, Type.SymbolType { value = "i8" }
         | ( Type.SymbolType { value = "bool" },
             Type.SymbolType { value = "string" } )
         | ( Type.SymbolType { value = "char" },
-            Type.SymbolType { value = "string" } ) ->
+            Type.SymbolType { value = "string" } )
+        | Type.SymbolType { value = "i8" }, Type.SymbolType { value = "i8" }
+        | Type.SymbolType { value = "i16" }, Type.SymbolType { value = "i16" }
+        | Type.SymbolType { value = "i32" }, Type.SymbolType { value = "i32" }
+        | Type.SymbolType { value = "i64" }, Type.SymbolType { value = "i64" }
+        | Type.SymbolType { value = "f32" }, Type.SymbolType { value = "f32" }
+        | Type.SymbolType { value = "f64" }, Type.SymbolType { value = "f64" }
+        | Type.SymbolType { value = "bool" }, Type.SymbolType { value = "bool" }
+        | Type.SymbolType { value = "char" }, Type.SymbolType { value = "char" }
+          ->
             target_type
         | _ when source_type = target_type -> target_type
         | _ ->
@@ -245,11 +283,19 @@ module TypeChecker = struct
         Type.SymbolType { value = "string" }
     | Expr.SizeofExpr { type_expr } -> (
         match type_expr with
-        | Ast.Type.SymbolType { value = "int" }
-        | Ast.Type.SymbolType { value = "float" }
-        | Ast.Type.SymbolType { value = "char" }
-        | Ast.Type.SymbolType { value = "string" }
-        | Ast.Type.SymbolType { value = "bool" } ->
+        | Type.SymbolType { value = "i8" }
+        | Type.SymbolType { value = "i16" }
+        | Type.SymbolType { value = "i32" }
+        | Type.SymbolType { value = "i64" }
+        | Type.SymbolType { value = "f32" }
+        | Type.SymbolType { value = "f64" }
+        | Type.SymbolType { value = "u8" }
+        | Type.SymbolType { value = "u16" }
+        | Type.SymbolType { value = "u32" }
+        | Type.SymbolType { value = "u64" }
+        | Type.SymbolType { value = "char" }
+        | Type.SymbolType { value = "string" }
+        | Type.SymbolType { value = "bool" } ->
             Type.SymbolType { value = "int" }
         | _ ->
             raise
@@ -257,8 +303,16 @@ module TypeChecker = struct
                  "Typechecker: Unsupported type for sizeof"))
     | Expr.InputExpr { prompt = _; target_type } -> (
         match target_type with
-        | Type.SymbolType { value = "int" }
-        | Type.SymbolType { value = "float" }
+        | Type.SymbolType { value = "i8" }
+        | Type.SymbolType { value = "i16" }
+        | Type.SymbolType { value = "i32" }
+        | Type.SymbolType { value = "i64" }
+        | Type.SymbolType { value = "f32" }
+        | Type.SymbolType { value = "f64" }
+        | Type.SymbolType { value = "u8" }
+        | Type.SymbolType { value = "u16" }
+        | Type.SymbolType { value = "u32" }
+        | Type.SymbolType { value = "u64" }
         | Type.SymbolType { value = "char" }
         | Type.SymbolType { value = "string" } ->
             target_type
