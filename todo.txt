@@ -6,6 +6,7 @@ Add Import/Export
 Add Unsafe
 Add Array Slicing
 Add Hex support
+Add f32 to codegen
 --------
 
 Know how to fix
@@ -16,4 +17,6 @@ ignore (build_call free_func [| result |] "" builder); // this is for the concat
 Need to fix
 --------
 Fix logical
+Fix return for new iN, fN, uN
+Fix uN types
 --------

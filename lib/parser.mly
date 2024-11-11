@@ -182,6 +182,8 @@ var_decl_list:
     | var_decl var_decl_list { $1 :: $2 }
 
 VarDeclStmt:
+    | type_expr Identifier Assign IntLit { let literal = match $1 with | Ast.Type.SymbolType { value = "i8" } -> Ast.Expr.Int8Expr { value = $4 } | Ast.Type.SymbolType { value = "i16" } -> Ast.Expr.Int16Expr { value = $4 } | Ast.Type.SymbolType { value = "i32" } -> Ast.Expr.Int32Expr { value = $4 } | Ast.Type.SymbolType { value = "i64" } -> Ast.Expr.Int64Expr { value = $4 } | _ -> Ast.Expr.Int32Expr { value = $4 } in Ast.Stmt.VarDeclarationStmt { identifier = $2; constant = false; assigned_value = Some literal; explicit_type = $1; } }
+    | type_expr Identifier Assign FloatLit { let literal = match $1 with | Ast.Type.SymbolType { value = "f32" } -> Ast.Expr.Float32Expr { value = $4 } | Ast.Type.SymbolType { value = "f64" } -> Ast.Expr.Float64Expr { value = $4 } | _ -> Ast.Expr.Float32Expr { value = $4 } in Ast.Stmt.VarDeclarationStmt { identifier = $2; constant = false; assigned_value = Some literal; explicit_type = $1; } }
     | type_expr Star Identifier Assign expr { Ast.Stmt.VarDeclarationStmt { identifier = $3; constant = false; assigned_value = Some $5; explicit_type = Ast.Type.PointerType { base_type = $1 }; } }
     | type_expr Identifier Assign expr { Ast.Stmt.VarDeclarationStmt { identifier = $2; constant = false; assigned_value = Some $4; explicit_type = $1; } }
     | Const type_expr Identifier Assign expr { Ast.Stmt.VarDeclarationStmt { identifier = $3; constant = true; assigned_value = Some $5; explicit_type = $2; } }

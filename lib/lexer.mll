@@ -115,61 +115,13 @@ rule token = parse
     | "^^"                  { column := !column + 2; Xor }
     | "<<"                  { column := !column + 2; Leftshift }
     | ">>"                  { column := !column + 2; Rightshift }
-
-    (* Floating-point literals with explicit f32/f64 suffix *)
-    | Floats "f32" as lexeme { 
-        column := !column + String.length lexeme; 
-        Float32Lit (float_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
-    }
-    | Floats "f64" as lexeme { 
-        column := !column + String.length lexeme; 
-        Float64Lit (float_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
-    }
-
-    (* Integer literals with explicit i8/i16/etc. suffix *)
-    | Digits "i8" as lexeme { 
-        column := !column + String.length lexeme; 
-        Int8Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 2)))
-    }
-    | Digits "i16" as lexeme { 
-        column := !column + String.length lexeme; 
-        Int16Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
-    }
-    | Digits "i32" as lexeme { 
-        column := !column + String.length lexeme; 
-        Int32Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
-    }
-    | Digits "i64" as lexeme { 
-        column := !column + String.length lexeme; 
-        Int64Lit (int_of_string (String.sub lexeme 0 (String.length lexeme - 3)))
-    }
-    | Digits as lexeme {
-        column := !column + String.length lexeme;
-        IntLit (int_of_string lexeme)
-    }
-
-    | Identifier as lexeme  { 
-        column := !column + String.length lexeme; 
-        Identifier lexeme 
-    }
-    | '\'' [^'\''] '\''     { 
-        let lexeme = Lexing.lexeme lexbuf in 
-        column := !column + String.length lexeme; 
-        CharLit (lexeme.[1]) 
-    }
-    | '"' [^'"']* '"'       { 
-        let lexeme = Lexing.lexeme lexbuf in 
-        column := !column + String.length lexeme; 
-        StringLit (String.sub lexeme 1 (String.length lexeme - 2)) 
-    }
+    | Floats as lexeme      { column := !column + String.length lexeme; FloatLit (float_of_string lexeme) }
+    | Digits as lexeme      { column := !column + String.length lexeme; IntLit (int_of_string lexeme) }
+    | Identifier as lexeme  { column := !column + String.length lexeme; Identifier lexeme }
+    | '\'' [^'\''] '\''     { let lexeme = Lexing.lexeme lexbuf in column := !column + String.length lexeme; CharLit (lexeme.[1]) }
+    | '"' [^'"']* '"'       { let lexeme = Lexing.lexeme lexbuf in column := !column + String.length lexeme; StringLit (String.sub lexeme 1 (String.length lexeme - 2)) }
     | eof                   { EOF }
-    | _                     { 
-        let saved_line = get_line () in 
-        let saved_column = get_column () in 
-        let lexeme = Lexing.lexeme lexbuf in 
-        Printf.eprintf "Unexpected token '%s' at Line %d, Column %d\n" lexeme saved_line saved_column; 
-        exit (-1) 
-    }
+    | _                     { let saved_line = get_line () in let saved_column = get_column () in let lexeme = Lexing.lexeme lexbuf in Printf.eprintf "Unexpected token '%s' at Line %d, Column %d\n" lexeme saved_line saved_column; exit (-1) }
 
 and read_comment = parse
     | '\n'                 { incr line; column := 0; token lexbuf }

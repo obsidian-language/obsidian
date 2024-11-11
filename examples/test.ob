@@ -1,4 +1,4 @@
 fn main() i32 {
-    i32 x = 400;
-    return x;
+    println("Hello, world!");
+    return 0;
 }
