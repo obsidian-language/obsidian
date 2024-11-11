@@ -5,8 +5,11 @@ Add Dealloc
 Add Import/Export
 Add Unsafe
 Add Array Slicing
-Add Hex support
+Add Hex support/Binary support
 Add f32 to codegen
+Add new data-types to codegen casting
+Add new data-types to codgen input
+Add casting for all types, iN -> fN, fN -> iN, uN -> fN & uN -> iN, iN/fN/uN -> string, iN -> bool
 --------
 
 Know how to fix
@@ -19,4 +22,5 @@ Need to fix
 Fix logical
 Fix return for new iN, fN, uN
 Fix uN types
+fix default type for iN, fN, uN
 --------

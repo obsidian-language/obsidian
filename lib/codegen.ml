@@ -526,8 +526,16 @@ let rec codegen_expr = function
       let value = codegen_expr expr in
       let target_llvm_type =
         match target_type with
-        | Ast.Type.SymbolType { value = "int" } -> i64_type
-        | Ast.Type.SymbolType { value = "float" } -> f64_type
+        | Ast.Type.SymbolType { value = "i8" } -> i8_type
+        | Ast.Type.SymbolType { value = "i16" } -> i16_type
+        | Ast.Type.SymbolType { value = "i32" } -> i32_type
+        | Ast.Type.SymbolType { value = "i64" } -> i64_type
+        | Ast.Type.SymbolType { value = "f32" } -> f32_type
+        | Ast.Type.SymbolType { value = "f64" } -> f64_type
+        | Ast.Type.SymbolType { value = "u8" } -> u8_type
+        | Ast.Type.SymbolType { value = "u16" } -> u16_type
+        | Ast.Type.SymbolType { value = "u32" } -> u32_type
+        | Ast.Type.SymbolType { value = "u64" } -> u64_type
         | Ast.Type.SymbolType { value = "string" } -> string_type
         | _ -> failwith "Codegen: Unsupported target type for cast"
       in
