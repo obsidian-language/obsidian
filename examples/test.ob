@@ -1,4 +1,5 @@
-fn main() i32 {
+fn main() void {
+    i64 x = 10;
+    x = 19;
     println("Hello, world!");
-    return 0;
 }

@@ -22,5 +22,6 @@ Need to fix
 Fix logical
 Fix return for new iN, fN, uN
 Fix uN types
-fix default type for iN, fN, uN
+Fix default type for iN, fN, uN
+Fix Assignment for variables
 --------
