@@ -1,7 +1,7 @@
-fn createPerson(string name, int age) void {
+fn createPerson(string name, i32 age) void {
     struct NewPerson {
         string name
-        int age
+        i32 age
     }
 
     NewPerson.name = name;
@@ -11,7 +11,7 @@ fn createPerson(string name, int age) void {
     println(NewPerson.age);
 }
 
-fn main() int {
+fn main() i32 {
     createPerson("azlo", 19);
     createPerson("john", 10);
     return 0;

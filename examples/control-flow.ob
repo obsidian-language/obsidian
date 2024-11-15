@@ -1,5 +1,5 @@
 // Control-Flow examples in Obsidian
-fn main() int {
+fn main() i32 {
     bool y = false;
     string z = "Helloo0";
 
@@ -22,13 +22,13 @@ fn main() int {
         }
     }
 
-    int i = 0;
+    i32 i = 0;
     while (i < 1) {
         println("Hello, world");
         i++;
     }
     
-    for (int j = 0; j <= 5; j++) {
+    for (i32 j = 0; j <= 5; j++) {
         println("Hello, world!");
     }
     return 0;

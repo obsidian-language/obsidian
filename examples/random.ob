@@ -1,11 +1,11 @@
-fn random(int seed) int {
+fn random(i64 seed) i64 {
     return (seed * 1103515245 + 12345) & 524287;
 }
 
-fn main() int {
-    int seed = 0;
+fn main() i32 {
+    i64 seed = 0;
 
-    for (int i = 0; i < 10; i++) {
+    for (i32 i = 0; i < 10; i++) {
         seed = random(seed);
         println("%v", seed);
     }

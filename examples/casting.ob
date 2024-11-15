@@ -1,10 +1,10 @@
 // Casting type
-fn main() int {
-    int x = 5;
-    float fx = cast(x, float); // Casting type int to type float
+fn main() i32 {
+    i32 x = 5;
+    f32 fx = cast(x, f32); // Casting type int to type float
 
-    float y = 5.0;
-    int iy = cast(y, int); // Casting type float to type int
+    f32 y = 5.0;
+    i32 iy = cast(y, i32); // Casting type float to type int
 
     return 0;
 }

@@ -1,47 +1,47 @@
 // Simple calc in Obsidian
-fn add(int x, int y) int {
+fn add(i64 x, i64 y) i64 {
     return x + y;
 }
 
-fn sub(int x, int y) int {
+fn sub(i64 x, i64 y) i64 {
     return x - y;
 }
 
-fn mult(int x, int y) int {
+fn mult(i64 x, i64 y) i64 {
     return x * y;
 }
 
-fn div(int x, int y) float {
+fn div(i64 x, i64 y) f64 {
     if (y == 0) {
-        println("Can't divide by zero");
+        pri64ln("Can't divide by zero");
     }
-    return cast(x / y, float);
+    return cast(x / y, f64);
 }
 
-fn power(float base, float exp) int {
-    return cast(base ** exp, int);
+fn power(f64 base, f64 exp) i64 {
+    return cast(base ** exp, i64);
 }
 
-fn main() int {
+fn main() i32 {
     char op = input("Enter op: ", char);
-    int x = input("Enter number one: ", int);
-    int y = input("Enter number two: ", int); 
+    i64 x = input("Enter number one: ", i64);
+    i64 y = input("Enter number two: ", i64); 
 
     switch (op) {
         case '+':
-            println(add(x, y));
+            pri64ln(add(x, y));
         case '-':
-            println(sub(x, y));
-        case '*':
-            println(mult(x, y));
+            pri64ln(sub(x, y));
+        case '*':`
+            pri64ln(mult(x, y));
         case '/':
-            println(div(y, x));
+            pri64ln(div(y, x));
         case '^':
-            println(power(cast(x, float), cast(y, float)));
+            pri64ln(power(cast(x, f64), cast(y, f64)));
         case '%':
-            println(cast(x % y, float));
+            pri64ln(cast(x % y, f64));
         default:
-            println("case not found!");
+            pri64ln("case not found!");
     }
     return 0;
 }

@@ -1,5 +1,5 @@
-fn main() int {
-    int age = input("Enter age: ", int);
+fn main() i32 {
+    i32 age = input("Enter age: ", i32);
     string res = (age >= 18) ? "18 or older" : "17 or younger";
     println(res);
     return 0;

@@ -2,7 +2,7 @@ fn greet(string name) string {
     return name;
 }
 
-fn main() int {
+fn main() i32 {
     string name = greet("Azlo");
     println("Hello, " ^ name);
     return 0;

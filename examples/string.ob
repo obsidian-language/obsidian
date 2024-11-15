@@ -2,7 +2,7 @@ fn strcmp(string StringOne, string StringTwo) bool {
     return StringOne == StringTwo;
 }
 
-fn main() int {
+fn main() i32 {
     if (strcmp(command, "Hello")) {
         println("this works");
     } else {
