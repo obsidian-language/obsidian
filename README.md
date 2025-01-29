@@ -11,14 +11,12 @@
 
 ## Supported Architectures
 
-<p align="center">
 | Platform  | Architecture | Support |
-|-----------|-------------|---------|
+| :-----------|-------------|---------: |
 | Windows   | None        | ❌ Not Supported |
 | Linux     | x86_64      | ✅ Supported     |
 | Linux     | aarch64     | ✅ Supported     |
 | macOS     | arm64       | ✅ Supported     |
-</p>
 
 <a href="docs/snippets.md#fib">
 <img src="docs/images/obsidian_snippet.png" align="right" width="375" alt="fib code in Obsidian. Follow the link to read more.">
