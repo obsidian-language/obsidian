@@ -9,15 +9,6 @@
   <a href="#join-us">Join us</a>
 </p>
 
-## Supported Architectures
-
-| Platform  | Architecture | Support |
-| :-----------|-------------|---------: |
-| Windows   | None        | ❌ Not Supported |
-| Linux     | x86_64      | ✅ Supported     |
-| Linux     | aarch64     | ✅ Supported     |
-| macOS     | arm64       | ✅ Supported     |
-
 <a href="docs/snippets.md#fib">
 <img src="docs/images/obsidian_snippet.png" align="right" width="375" alt="fib code in Obsidian. Follow the link to read more.">
 </a>
@@ -139,7 +130,7 @@ opam switch create 4.14.2
 
 eval $(opam env)
 
-opam install ocaml-lsp-server odoc ocamlformat utop ppx_deriving llvm.14.0.6 dune menhir
+opam install odoc ppx_deriving llvm.14.0.6 dune menhir
 
 <package manager> llvm14
 
@@ -150,7 +141,7 @@ cd obsidian
 dune build
 ```
 
-For windows:
+⚠️ UNSUPPORTED: For windows:
 ```
 winget install Git.Git OCaml.opam
 
@@ -172,8 +163,6 @@ for /f "tokens=*" %i in ('opam env') do @%i
 
 opam install ocaml-lsp-server odoc ocamlformat utop ppx_deriving llvm.14.0.6 dune menhir
 ```
-
-For LLVM on windows your on your own for right now.
 
 For those who just want the executable:
 ```shell
