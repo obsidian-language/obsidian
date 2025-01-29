@@ -1,6 +1,6 @@
 # Obsidian Language: **An experimental language**
 
-<p align="left">
+<p align="right">
   <a href="#why-build-obsidian">Why?</a> |
   <a href="#language-goals">Goals</a> |
   <a href="#project-status">Status</a> |
