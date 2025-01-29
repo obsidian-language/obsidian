@@ -207,6 +207,6 @@ You can also directly:
 
 You can **check out some
 ["good first issues"](https://github.com/obsidian-language/obsidian/labels/good%20first%20issue)**,
-or join the `#contributing-help` channel on`
+or join the `#contributing-help` channel on
 [Discord](https://discord.gg/#). See our full
 [`CONTRIBUTING`](CONTRIBUTING.md) documentation for more details.
