@@ -1,6 +1,16 @@
 # Obsidian Language: 
 **An experimental language**
 
+## Supported Architectures
+
+| Platform  | Architecture | Support |
+|-----------|-------------|---------|
+| Windows   | None        | ❌ Not Supported |
+| Linux     | x86_64      | ✅ Supported     |
+| Linux     | aarch64     | ✅ Supported     |
+| macOS     | arm64       | ✅ Supported     |
+
+
 <p align="center">
   <a href="#why-build-obsidian">Why?</a> |
   <a href="#language-goals">Goals</a> |
